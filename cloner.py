@@ -6,7 +6,7 @@ import shutil
 
 spark = SparkSession.builder.getOrCreate()
 
-CLONE_FACTOR = 2
+CLONE_FACTOR = 1
 
 
 def read_csv(pth):
@@ -33,17 +33,8 @@ def main():
             .write.format("com.databricks.spark.csv")
             .option("header", "true")
             .option('delimiter', '\t')
-            .save("data_x{}_tmp/{}.tsv".format(CLONE_FACTOR, name)))
-
-    os.mkdir('data_x{}'.format(CLONE_FACTOR))
-
-    for dir_ in os.listdir('data_x{}_tmp'.format(CLONE_FACTOR)):
-        for file_ in os.listdir(os.path.join('data_x{}_tmp'.format(CLONE_FACTOR), dir_)):
-            if file_.endswith('.csv'):
-                os.replace(os.path.join('data_x{}_tmp'.format(CLONE_FACTOR), dir_, file_),
-                           os.path.join('data_x{}'.format(CLONE_FACTOR), dir_))
-    shutil.rmtree('data_x{}_tmp'.format(CLONE_FACTOR), ignore_errors=True)
-
+            .option('emptyValue', r'\N')
+            .save("data_x{}/{}.tsv".format(CLONE_FACTOR, name)))
 
 if __name__ == '__main__':
     main()
